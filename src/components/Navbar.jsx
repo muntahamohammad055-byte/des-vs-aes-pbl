@@ -13,10 +13,11 @@ import {
   Menu, 
   X,
   Sun,
-  Moon
+  Moon,
+  GraduationCap
 } from 'lucide-react';
 
-export default function Navbar({ activePage, setActivePage, isDark, toggleTheme }) {
+export default function Navbar({ activePage, setActivePage, isDark, toggleTheme, onOpenVivaModal }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const navItems = [
@@ -86,8 +87,17 @@ export default function Navbar({ activePage, setActivePage, isDark, toggleTheme 
             })}
           </nav>
 
-          {/* Controls: Theme & Mobile Toggle */}
+          {/* Controls: Viva Demo, Theme & Mobile Toggle */}
           <div className="flex items-center gap-2">
+            <button
+              onClick={onOpenVivaModal}
+              title="Professor Viva & Demonstration Center"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-r from-cyan-500/20 via-indigo-500/20 to-blue-600/20 hover:from-cyan-500/30 hover:to-blue-600/30 border border-cyan-500/40 hover:border-cyan-400 text-cyan-300 font-mono text-xs font-bold transition-all shadow-[0_0_12px_rgba(0,242,254,0.15)] active:scale-95"
+            >
+              <GraduationCap className="w-4 h-4 text-cyan-400" />
+              <span className="hidden sm:inline">Viva Demo</span>
+            </button>
+
             <button
               onClick={toggleTheme}
               title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
@@ -110,6 +120,13 @@ export default function Navbar({ activePage, setActivePage, isDark, toggleTheme 
       {/* Mobile Menu Dropdown */}
       {mobileMenuOpen && (
         <div className="xl:hidden bg-[#0b1329] border-b border-cyan-500/20 px-4 pt-2 pb-4 space-y-1">
+          <button
+            onClick={() => { onOpenVivaModal && onOpenVivaModal(); setMobileMenuOpen(false); }}
+            className="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg text-xs font-bold font-mono bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 mb-3"
+          >
+            <GraduationCap className="w-4 h-4 text-cyan-400" />
+            Professor Viva & Demonstration Center
+          </button>
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = activePage === item.id;

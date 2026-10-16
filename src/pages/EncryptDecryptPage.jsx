@@ -319,6 +319,26 @@ export default function EncryptDecryptPage({ onNotify }) {
     }
   };
 
+  // Key Length Switch Handler
+  const handleKeyLengthChange = (bits) => {
+    setAesKeyLength(bits);
+    setEncryptionResult(null);
+    setDecryptionResult(null);
+    setDecryptedText('');
+    setIsMatch(null);
+    setErrorMessage('');
+  };
+
+  // Format Switch Handler
+  const handleFormatChange = (fmt) => {
+    setOutputFormat(fmt);
+    if (keyHex && keyBase64) {
+      if (keyInput === keyHex || keyInput === keyBase64) {
+        setKeyInput(fmt === 'hex' ? keyHex : keyBase64);
+      }
+    }
+  };
+
   // Reset Playground
   const handleReset = () => {
     setPlaintext('Confidential Engineering PBL Telemetry: DES vs AES Verification Payload 2025. 🔐');
@@ -373,57 +393,81 @@ export default function EncryptDecryptPage({ onNotify }) {
       </div>
 
       {/* Algorithm Config Sub-Bar */}
-      <div className="p-4 rounded-xl bg-[#0b1329] border border-slate-800 flex flex-wrap items-center justify-between gap-4 text-xs">
-        <div className="flex items-center gap-4 flex-wrap">
-          {algorithm === 'AES' ? (
-            <div className="flex items-center gap-2">
-              <span className="text-slate-400 font-medium">AES Key Size:</span>
-              {[128, 192, 256].map(bits => (
-                <button
-                  key={bits}
-                  onClick={() => setAesKeyLength(bits)}
-                  className={`px-2.5 py-1 rounded font-mono font-bold transition-all ${
-                    aesKeyLength === bits
-                      ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40'
-                      : 'bg-slate-900 text-slate-400 border border-slate-800 hover:text-white'
-                  }`}
-                >
-                  {bits}-bit
-                </button>
-              ))}
-            </div>
-          ) : (
-            <div className="flex items-center gap-2">
-              <span className="text-slate-400 font-medium">DES Key Size:</span>
-              <span className="px-2.5 py-1 rounded font-mono font-bold bg-rose-500/20 text-rose-300 border border-rose-500/40">
-                56 effective bits (64-bit key with 8 parity bits)
-              </span>
-            </div>
-          )}
+      <div className="p-4 rounded-xl bg-[#0b1329] border border-slate-800 space-y-3 text-xs">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div className="flex items-center gap-4 flex-wrap">
+            {algorithm === 'AES' ? (
+              <div className="flex items-center gap-2">
+                <span className="text-slate-400 font-medium">AES Key Size:</span>
+                {[128, 192, 256].map(bits => (
+                  <button
+                    key={bits}
+                    onClick={() => handleKeyLengthChange(bits)}
+                    className={`px-3 py-1.5 rounded-lg font-mono font-bold transition-all ${
+                      aesKeyLength === bits
+                        ? bits === 192
+                          ? 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/50 shadow-[0_0_12px_rgba(99,102,241,0.25)]'
+                          : bits === 128
+                          ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/50 shadow-[0_0_12px_rgba(6,182,212,0.25)]'
+                          : 'bg-blue-500/20 text-blue-300 border border-blue-500/50 shadow-[0_0_12px_rgba(59,130,246,0.25)]'
+                        : 'bg-slate-900 text-slate-400 border border-slate-800 hover:text-white'
+                    }`}
+                  >
+                    {bits}-bit {bits === 128 ? '(10 Rds)' : bits === 192 ? '(12 Rds)' : '(14 Rds)'}
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <div className="flex items-center gap-2">
+                <span className="text-slate-400 font-medium">DES Key Size:</span>
+                <span className="px-2.5 py-1 rounded font-mono font-bold bg-rose-500/20 text-rose-300 border border-rose-500/40">
+                  56 effective bits (64-bit key with 8 parity bits • 16 Feistel Rounds)
+                </span>
+              </div>
+            )}
 
-          <div className="flex items-center gap-2">
-            <span className="text-slate-400 font-medium">Output Format:</span>
-            <button
-              onClick={() => setOutputFormat('hex')}
-              className={`px-2 py-0.5 rounded font-mono ${outputFormat === 'hex' ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40' : 'text-slate-400'}`}
-            >
-              HEX
-            </button>
-            <button
-              onClick={() => setOutputFormat('base64')}
-              className={`px-2 py-0.5 rounded font-mono ${outputFormat === 'base64' ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40' : 'text-slate-400'}`}
-            >
-              BASE64
-            </button>
+            <div className="flex items-center gap-2">
+              <span className="text-slate-400 font-medium">Output Format:</span>
+              <button
+                onClick={() => handleFormatChange('hex')}
+                className={`px-2.5 py-1 rounded font-mono font-bold transition-all ${outputFormat === 'hex' ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40' : 'bg-slate-900 text-slate-400 border border-slate-800'}`}
+              >
+                HEX
+              </button>
+              <button
+                onClick={() => handleFormatChange('base64')}
+                className={`px-2.5 py-1 rounded font-mono font-bold transition-all ${outputFormat === 'base64' ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40' : 'bg-slate-900 text-slate-400 border border-slate-800'}`}
+              >
+                BASE64
+              </button>
+            </div>
           </div>
+
+          <button
+            onClick={handleReset}
+            className="text-xs text-slate-400 hover:text-cyan-300 flex items-center gap-1 transition-colors"
+          >
+            <RefreshCw className="w-3.5 h-3.5" /> Reset Playground
+          </button>
         </div>
 
-        <button
-          onClick={handleReset}
-          className="text-xs text-slate-400 hover:text-cyan-300 flex items-center gap-1 transition-colors"
-        >
-          <RefreshCw className="w-3.5 h-3.5" /> Reset Playground
-        </button>
+        {/* Informative Cryptographic Specification Pill */}
+        {algorithm === 'AES' && (
+          <div className="pt-2 border-t border-slate-800/80 flex flex-wrap items-center gap-3 text-[11px] font-mono">
+            <span className="text-slate-400 font-medium">Active Configuration:</span>
+            <span className={`px-2 py-0.5 rounded font-bold border ${aesKeyLength === 192 ? 'bg-indigo-500/10 text-indigo-300 border-indigo-500/30' : aesKeyLength === 128 ? 'bg-cyan-500/10 text-cyan-300 border-cyan-500/30' : 'bg-blue-500/10 text-blue-300 border-blue-500/30'}`}>
+              AES-{aesKeyLength}
+            </span>
+            <span className="text-slate-300">
+              {aesKeyLength === 128 && '10 SPN Rounds • 16-Byte Key (32 Hex / 24 Base64) • Key Space: 2¹²⁸ ≈ 3.40 × 10³⁸'}
+              {aesKeyLength === 192 && '12 SPN Rounds • 24-Byte Key (48 Hex / 32 Base64) • Key Space: 2¹⁹² ≈ 6.27 × 10⁵⁷'}
+              {aesKeyLength === 256 && '14 SPN Rounds • 32-Byte Key (64 Hex / 44 Base64) • Key Space: 2²⁵⁶ ≈ 1.15 × 10⁷⁷'}
+            </span>
+            <span className="text-slate-400 ml-auto hidden sm:inline">
+              96-bit Nonce + 128-bit GMAC Tag (NIST SP 800-38D)
+            </span>
+          </div>
+        )}
       </div>
 
       {/* Grid: Inputs & Cryptographic Controls */}
@@ -465,7 +509,7 @@ export default function EncryptDecryptPage({ onNotify }) {
             <div className="flex items-center justify-between">
               <label className="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-2">
                 <Key className="w-4 h-4 text-cyan-400" />
-                Secret Key ({algorithm === 'AES' ? `${aesKeyLength} bits` : '64 bits / 56 eff.'})
+                Secret Key ({algorithm === 'AES' ? `AES-${aesKeyLength} • ${aesKeyLength / 8} Bytes (${aesKeyLength / 4} Hex)` : 'DES • 8 Bytes (16 Hex)'})
               </label>
               <button
                 onClick={handleGenerateKey}
@@ -484,7 +528,13 @@ export default function EncryptDecryptPage({ onNotify }) {
                   setKeyInput(e.target.value);
                   setKeyHex(e.target.value);
                 }}
-                placeholder={algorithm === 'AES' ? `Enter ${aesKeyLength / 4} hex characters or raw key` : "Enter 16 hex characters (8 bytes)"}
+                placeholder={
+                  algorithm === 'AES' 
+                    ? outputFormat === 'hex'
+                      ? `Enter exactly ${aesKeyLength / 4} hex characters (${aesKeyLength / 8} bytes for AES-${aesKeyLength})`
+                      : `Enter valid Base64 string (${aesKeyLength / 8} bytes for AES-${aesKeyLength})`
+                    : "Enter 16 hex characters (8 bytes for DES)"
+                }
                 className="w-full p-2.5 pr-10 rounded-xl bg-slate-950 border border-slate-800 text-cyan-300 font-mono text-xs focus:outline-none focus:border-cyan-500"
               />
               <button
@@ -496,9 +546,13 @@ export default function EncryptDecryptPage({ onNotify }) {
               </button>
             </div>
 
-            <div className="text-[11px] text-slate-400 flex items-center justify-between">
+            <div className="text-[11px] text-slate-400 flex items-center justify-between font-mono">
               <span>Entropy Source: <code className="text-emerald-400">crypto.getRandomValues()</code></span>
-              <span className="font-mono">{algorithm === 'AES' ? `${aesKeyLength / 8} bytes` : '8 bytes'}</span>
+              <span>
+                {algorithm === 'AES' 
+                  ? `${aesKeyLength} bits • ${aesKeyLength / 8} bytes (${aesKeyLength / 4} Hex / ${aesKeyLength === 128 ? '24' : aesKeyLength === 192 ? '32' : '44'} Base64)`
+                  : '64 bits • 8 bytes (56 effective bits)'}
+              </span>
             </div>
           </div>
 

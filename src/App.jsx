@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import Notification from './components/Notification';
+import ProfessorDemoModal from './components/ProfessorDemoModal';
 
 // Pages
 import DashboardPage from './pages/DashboardPage';
@@ -21,6 +22,7 @@ import { runBenchmarkSuite } from './services/benchmarkService';
 export default function App() {
   const [activePage, setActivePage] = useState('dashboard');
   const [isDark, setIsDark] = useState(true);
+  const [isVivaModalOpen, setIsVivaModalOpen] = useState(false);
   const [notification, setNotification] = useState(null);
   const [benchmarkResults, setBenchmarkResults] = useState([]);
 
@@ -91,6 +93,15 @@ export default function App() {
         setActivePage={setActivePage}
         isDark={isDark}
         toggleTheme={toggleTheme}
+        onOpenVivaModal={() => setIsVivaModalOpen(true)}
+      />
+
+      {/* Professor Viva Demonstration Modal */}
+      <ProfessorDemoModal
+        isOpen={isVivaModalOpen}
+        onClose={() => setIsVivaModalOpen(false)}
+        setActivePage={setActivePage}
+        onNotify={handleNotify}
       />
 
       {/* Main Content Area */}
